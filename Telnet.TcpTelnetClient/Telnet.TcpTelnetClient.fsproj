@@ -10,8 +10,10 @@
     <RepositoryUrl>https://github.com/kdurkin77/KD.Telnet</RepositoryUrl>
     <PackageProjectUrl>https://github.com/kdurkin77/KD.Telnet</PackageProjectUrl>
     <PackageTags>Telnet;Echo;Timeout;</PackageTags>
-    <PackageReleaseNotes></PackageReleaseNotes>
-    <Version>1.1.0</Version>
+    <PackageReleaseNotes>Updated the tcpclient receive extensions to instead of depend on a timeout, just get all the data available. 
+      RFC854 seems to suggest that all data will be queued and sent together so this should not cause any problems
+    </PackageReleaseNotes>
+    <Version>1.1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
