@@ -2,6 +2,7 @@
 module KD.Telnet.TcpTelnetClient.TcpClientExtensions
 
 open System
+open System.Net.NetworkInformation
 
 type System.Net.Sockets.TcpClient with
 
@@ -61,3 +62,11 @@ type System.Net.Sockets.TcpClient with
                 }
 
         ReceiveDataAsync Array.empty
+
+    member this.IsConnected() =
+        IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpConnections()
+        |> Seq.where (fun x ->  x.LocalEndPoint.Equals(this.Client.LocalEndPoint) && x.RemoteEndPoint.Equals(this.Client.RemoteEndPoint))
+        |> Seq.tryExactlyOne
+        |> function
+        | Some x    -> x.State = TcpState.Established
+        | None      -> false

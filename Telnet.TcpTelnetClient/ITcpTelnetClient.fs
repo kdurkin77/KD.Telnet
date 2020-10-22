@@ -7,6 +7,7 @@ open System.Net
 type ITcpTelnetClient =
     inherit IDisposable
     abstract ConnectAsync : IPAddress ->  int -> Task
+    abstract IsConnected : unit -> bool
     abstract ReceiveData : TimeSpan -> Task<string>
     abstract ReceiveEcho : int -> TimeSpan -> Task<string>
     abstract SendData : string -> Task

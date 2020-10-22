@@ -31,6 +31,8 @@ type TcpTelnetClient() =
     interface ITcpTelnetClient with
         member _.ConnectAsync (ip: IPAddress) (port: int) = tcpClient.ConnectAsync(ip, port)
 
+        member _.IsConnected() = tcpClient.IsConnected()
+
         member _.ReceiveData(timeout) = 
             task {
                 let! receivedBytes = tcpClient.GetResponseWithTimeoutAsync(timeout)
