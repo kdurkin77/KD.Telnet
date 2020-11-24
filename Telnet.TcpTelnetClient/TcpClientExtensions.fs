@@ -2,6 +2,7 @@
 module KD.Telnet.TcpTelnetClient.TcpClientExtensions
 
 open System
+open System.Net
 open System.Net.NetworkInformation
 
 type System.Net.Sockets.TcpClient with
@@ -64,8 +65,24 @@ type System.Net.Sockets.TcpClient with
         ReceiveDataAsync Array.empty
 
     member this.IsConnected() =
+        //in .Net Core 3.1 the IPs will use the v6 schema if v6 is enabled
+        //so in order to properly compare the IPs we're ensuring everything
+        //is converted to IPv6
+
         IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpConnections()
-        |> Seq.where (fun x ->  x.LocalEndPoint.Equals(this.Client.LocalEndPoint) && x.RemoteEndPoint.Equals(this.Client.RemoteEndPoint))
+        |> Seq.choose (fun i ->
+            let clientLocal = 
+                let ipEndPoint = (this.Client.LocalEndPoint :?> IPEndPoint)
+                IPEndPoint(ipEndPoint.Address.MapToIPv6(), ipEndPoint.Port)
+            let clientRemote = 
+                let ipEndPoint = (this.Client.RemoteEndPoint :?> IPEndPoint)
+                IPEndPoint(ipEndPoint.Address.MapToIPv6(), ipEndPoint.Port)
+            let local = IPEndPoint(i.LocalEndPoint.Address.MapToIPv6(), i.LocalEndPoint.Port); 
+            let remote = IPEndPoint(i.RemoteEndPoint.Address.MapToIPv6(), i.RemoteEndPoint.Port);
+            match local.Equals(clientLocal) && remote.Equals(clientRemote) with
+            | true      -> Some i
+            | false     -> None
+        )
         |> Seq.tryExactlyOne
         |> function
         | Some x    -> x.State = TcpState.Established
